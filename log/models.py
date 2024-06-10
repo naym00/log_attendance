@@ -3,8 +3,8 @@ from help.choices import common as CHOICE
 
 class Log(models.Model):
     employee = models.CharField(max_length=10, choices=CHOICE.EMPLOYEE)
-    intime = models.DateField()
-    mintime = models.DateField()
+    intime = models.DateTimeField(blank=True, null=True)
+    mintime = models.DateTimeField(blank=True, null=True)
 
     def __str__(self):
         return f'{self.employee} - {self.intime} - {self.mintime}'

@@ -13,20 +13,8 @@ def getShift(request):
 
 @api_view(['POST'])
 def addShift(request):
-    error_message = []
-
-    allow_fields = ['name', 'start_at', 'end_at']
-    required_fields = ['name', 'start_at', 'end_at']
-    unique_fields = ['name']
-
-    error_message = ghelp().checkFields(MODEL_SHIF.Shift, request.data, allow_fields=allow_fields, required_fields=required_fields, unique_fields=unique_fields)
-    if not error_message:
-        shifts = MODEL_SHIF.Shift.objects.all()
-        shiftserializers = SRLZER_SHIF.Shiftserializer(shifts, many=False)
-        if shiftserializers.is_valid():
-            shiftserializers.save()
-            return Response({'data':shiftserializers.data, 'message': []}, status=status.HTTP_201_CREATED)
-        else:
-            return Response({'data':shiftserializers.errors, 'message': []}, status=status.HTTP_400_BAD_REQUEST)
-    else:
-        return Response({'data':{}, 'message': error_message}, status=status.HTTP_400_BAD_REQUEST)
+    shiftserializers = SRLZER_SHIF.Shiftserializer(data=request.data, many=False)
+    if shiftserializers.is_valid():
+        shiftserializers.save()
+        return Response({'data':shiftserializers.data, 'message': []}, status=status.HTTP_201_CREATED)
+    else:  return Response({'data':shiftserializers.errors, 'message': []}, status=status.HTTP_400_BAD_REQUEST)
