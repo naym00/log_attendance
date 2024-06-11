@@ -6,9 +6,10 @@ class Attendance(models.Model):
     employee = models.CharField(max_length=10, choices=CHOICE.EMPLOYEE)
     intime = models.DateTimeField()
     outtime = models.DateTimeField()
-    shift = models.ForeignKey(MODEL_SHIF.Shift, on_delete=models.SET_NULL, blank=True, null=True)
+    date = models.DateField()
+    shift = models.ManyToManyField(MODEL_SHIF.Shift, blank=True)
 
     def __str__(self):
-        return f'{self.employee} - {self.intime} - {self.shift.name}'
+        return f'{self.employee} - {self.intime} - {[shift.name for shift in self.shift.all()]}'
     class Meta:
-        constraints = [models.UniqueConstraint(fields=['employee', 'intime', 'shift'], name='employeeintimeshift')]
+        constraints = [models.UniqueConstraint(fields=['employee', 'intime'], name='attendance_employeeintime')]

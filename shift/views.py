@@ -18,3 +18,15 @@ def addShift(request):
         shiftserializers.save()
         return Response({'data':shiftserializers.data, 'message': []}, status=status.HTTP_201_CREATED)
     else:  return Response({'data':shiftserializers.errors, 'message': []}, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['PUT'])
+def updateShift(request, shiftid=None):
+    shift = MODEL_SHIF.Shift.objects.filter(id=shiftid)
+    if shift.exists():
+        shift = shift.first()
+        shiftserializer = SRLZER_SHIF.Shiftserializer(instance=shift, data=request.data, partial=True)
+        if shiftserializer.is_valid():
+            shiftserializer.save()
+            return Response({'data':shiftserializer.data, 'message': []}, status=status.HTTP_200_OK)
+        else:  return Response({'data':shiftserializer.errors, 'message': []}, status=status.HTTP_400_BAD_REQUEST)
+    else:  return Response({'data':{}, 'message': ['doesn\'t exist!']}, status=status.HTTP_400_BAD_REQUEST)
