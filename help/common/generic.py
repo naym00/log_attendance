@@ -1,6 +1,50 @@
 from rest_framework import status
 from datetime import datetime
 class Generichelps:
+    
+    def generateORSQL(self, condition):
+        
+        sql = '('
+        remove_parenthesis = True
+        for index, each in enumerate(condition['values']):
+            if condition['operation'] == '=':
+                sql += f"{each['field']}='{each['value']}'"
+            elif condition['operation'] == 'like':
+                sql += f"{each['field']} LIKE '%{each['value']}%'"
+            
+            if index+1 < len(condition['values']):
+                sql += ' ' + 'OR' + ' '
+                remove_parenthesis = False
+            elif index+1 == len(condition['values']): sql += ')'
+        if remove_parenthesis: sql = sql[1:][:-1]
+        return sql
+        
+    
+    def generatePaginationSQL(self, details):
+        sql = ''
+        sql += 'SELECT'
+        sql += ' ' + ', '.join(details['select'])
+        sql += ' FROM ' + details['from']
+        
+        if details['where']:
+            sql += ' WHERE'
+            for index, condition in enumerate(details['where']):
+                sql += ' ' + self.generateORSQL(condition)
+                if index+1 < len(details['where']): sql += ' AND'
+        
+        if details['order_by']:
+            sql += ' ORDER BY'
+            for index, orderby in enumerate(details['order_by']):
+                sql += ' ' + orderby['field']
+                if orderby['direction'] == '+': sql += ' ' + 'ASC'
+                if index+1 < len(details['order_by']): sql += ','
+        
+        sql += f" LIMIT {details['limit']} OFFSET {details['offset']}"
+        
+        return sql
+        
+        
+        
 
     def checkFields(self, classOBJ, data, allow_fields=[], required_fields=[], unique_fields=[]):
         error_message = []

@@ -44,22 +44,30 @@ def generateAttendance(request, fromdate=None, todate=None):
                 intime = inlog['first_check_in']
                 outtime = outlog['last_check_out']
                 
-                
                 log_in = MODEL_LOGG.Log.objects.get(employee=employee, mintime=intime)
                 log_out = MODEL_LOGG.Log.objects.get(employee=employee, mintime=outtime)
-                try:
-                    attendance = MODEL_ATTE.Attendance()
-                    attendance.employee=employee
-                    attendance.intime=log_in.intime
-                    attendance.outtime=log_out.intime
-                    attendance.date=log_in.date
-                    attendance.save()
+                attendance = MODEL_ATTE.Attendance.objects.filter(employee=employee, intime=log_in.intime)
+                shift, shift_details = ghelp().calculateShiftDetails(shifts, intime, outtime)
+                
+                if not attendance.exists():
+                    try:
+                        instance = MODEL_ATTE.Attendance()
+                        instance.employee=employee
+                        instance.intime=log_in.intime
+                        instance.outtime=log_out.intime
+                        instance.date=log_in.date
+                        instance.save()
 
-                    shift, shift_details = ghelp().calculateShiftDetails(shifts, intime, outtime)
+                        for shift_detail in shift_details:
+                            if shift_detail['percentage']>=50:
+                                instance.shift.add(shift_detail['shift'])
+                    except: pass
+                else:
+                    attendance.update(outtime=log_out.intime)
                     for shift_detail in shift_details:
                         if shift_detail['percentage']>=50:
-                            attendance.shift.add(shift_detail['shift'])
-                except: pass
+                            if shift_detail['shift'] not in attendance.first().shift.all():
+                                attendance.first().shift.add(shift_detail['shift'])
 
             fromdate += timedelta(days=1)
         return Response({'data':{}, 'message': []}, status=status.HTTP_200_OK)

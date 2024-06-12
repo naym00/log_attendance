@@ -7,6 +7,24 @@ from shift.serializer import serializers as SRLZER_SHIF
 
 @api_view(['GET'])
 def getShift(request):
+    
+    "SELECT id, name, nickname, roll, gender, age, district FROM employee_employee WHERE age='10' AND (name LIKE '%jasim%' OR nickname LIKE '%jasim%') ORDER BY roll ASC LIMIT 10 OFFSET 10"
+    
+    details = {
+        'select': ['id', 'name', 'nickname', 'roll', 'gender', 'age', 'district'],
+        'from': 'employee_employee',
+        'where':[
+            {'values':[{'field': 'age', 'value': 10}], 'operation': '='},
+            {'values':[{'field': 'name', 'value': 'jasim'}, {'field': 'nickname', 'value': 'jasim'}], 'operation': 'like'}
+        ],
+        'order_by': [{'field': 'roll', 'direction': '+'}],
+            'limit': 10,
+            'offset': 10
+    }
+    sql = ghelp().generatePaginationSQL(details)
+    print(sql)
+    
+    
     shifts = MODEL_SHIF.Shift.objects.all()
     shiftserializers = SRLZER_SHIF.Shiftserializer(shifts, many=True)
     return Response({'data':shiftserializers.data, 'message': []}, status=status.HTTP_200_OK)
